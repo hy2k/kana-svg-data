@@ -1,0 +1,10 @@
+{
+  "name": "kana-svg-data",
+  "version": "0.1.0",
+  "description": "JSON data for Japanese Kana characters",
+  "main": "index.js",
+  "repository": "https://github.com/hy2k/kana-svg-data.git",
+  "author": "Yusuke Higuchi <hy2k@outlook.jp>",
+  "license": "LGPL-3.0+",
+  "private": true
+}
