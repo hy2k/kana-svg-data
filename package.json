@@ -7,14 +7,20 @@
   "author": "Yusuke Higuchi <hy2k@outlook.jp>",
   "license": "LGPL-3.0+",
   "private": true,
-  "dependencies": {
-    "svgson": "^4.1.0"
-  },
   "scripts": {
-    "build": "ts-node ./src/index.ts"
+    "build": "ts-node ./src/index.ts",
+    "format": "prettier --write \"**/*.{js,ts,md}\"",
+    "lint": "eslint --fix --ext .js,.ts ."
   },
   "devDependencies": {
     "@types/node": "^14.0.27",
+    "@typescript-eslint/eslint-plugin": "^3.8.0",
+    "@typescript-eslint/parser": "^3.8.0",
+    "eslint": "^7.6.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.0.5",
+    "svgson": "^4.1.0",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7"
   }
