@@ -1,6 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { parse as parseSVG } from 'svgson'
+import { parseMedians } from './parse-medians'
+import { parseIdFromSVG } from './utils'
 
 const inputDir = path.join(__dirname, '../vendor/animCJK/svgsKana')
 const distDir = path.join(__dirname, '../dist')
@@ -38,50 +40,53 @@ const kanaDict: KanaDictionary = {
   ],
 }
 
-async function onFileContent(fileContent: string) {
+function getCharCode(filename: string): number {
+  return parseInt(path.basename(filename, '.svg'))
+}
+
+async function onFileContent(fileContent: string, filename: string) {
   const svgNode = await parseSVG(fileContent)
 
   // Remove the prefix `z` from id
-  const id = svgNode.attributes.id.slice(1)
+  const charCode = getCharCode(filename)
 
   const allSvgPaths = svgNode.children
     .filter((el) => el.name === 'path')
     .map((el) => el.attributes)
 
-  const stroke = allSvgPaths
-    .filter((el) => el.id)
-    .map((el) => ({
-      id: el.id.replace(/.*d/, ''),
-      d: el.d,
-    }))
-
-  const median = allSvgPaths
-    .filter((el) => el['clip-path'])
-    .map((el) => ({
-      id: el['clip-path'].replace(/.*c(\d+[a-z]*).+/, '$1'),
-      d: el.d,
-    }))
+  const medianElements = allSvgPaths.filter((el) => el['clip-path'])
 
   return {
-    id,
-    stroke,
-    median,
+    charCode,
+    strokes: allSvgPaths
+      .filter((el) => el.id)
+      .map((el) => ({
+        id: parseIdFromSVG(el.id),
+        value: el.d,
+      })),
+    medians: medianElements.map((el) => ({
+      id: parseIdFromSVG(el['clip-path']),
+      value: parseMedians(el.d),
+    })),
+    clipPaths: medianElements.map((el) => ({
+      id: parseIdFromSVG(el['clip-path']),
+      value: el.d,
+    })),
   }
 }
 
-function classify(dir: string, dict: KanaDictionary) {
-  const svgFiles = new Map<string, string[]>()
+function classifySVGFiles(dir: string, dict: KanaDictionary) {
+  const svgFiles = new Map<KanaCategoty, string[]>()
   const allFilenames = fs.readdirSync(dir)
 
-  Object.keys(dict).forEach((key) => {
+  const caterories = Object.keys(dict) as KanaCategoty[]
+  caterories.forEach((category) => {
     const filenames = allFilenames.filter((filename) => {
-      const charcode = parseInt(path.basename(filename, '.svg'))
-      return dict[key as KanaCategoty].includes(String.fromCharCode(charcode))
+      const charcode = getCharCode(filename)
+      return dict[category].includes(String.fromCharCode(charcode))
     })
-
-    svgFiles.set(key, filenames)
+    svgFiles.set(category, filenames)
   })
-
   return svgFiles
 }
 
@@ -89,18 +94,18 @@ if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir)
 }
 
-classify(inputDir, kanaDict).forEach((filelist, key) => {
+classifySVGFiles(inputDir, kanaDict).forEach((filelist, key) => {
   const outDir = path.join(distDir, key)
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir)
   }
 
   const promises = filelist.map((filename) => {
-    const buffer = fs.readFileSync(path.resolve(inputDir, filename), {
+    const fileContent = fs.readFileSync(path.resolve(inputDir, filename), {
       encoding: 'utf-8',
     })
 
-    return onFileContent(buffer)
+    return onFileContent(fileContent, filename)
   })
 
   const outPathAllChars = path.join(
@@ -117,15 +122,16 @@ classify(inputDir, kanaDict).forEach((filelist, key) => {
       })
 
       data.forEach((item) => {
-        const jaChar = String.fromCharCode(parseInt(item.id))
-
-        const outPathChar = path.join(outDir, `${jaChar}.json`)
-
-        fs.writeFile(outPathChar, JSON.stringify(item, null, 2), (err) => {
-          if (err) {
-            console.log(err)
+        const kana = String.fromCharCode(item.charCode)
+        fs.writeFile(
+          path.join(outDir, `${kana}.json`),
+          JSON.stringify(item, null, 2),
+          (err) => {
+            if (err) {
+              console.log(err)
+            }
           }
-        })
+        )
       })
     })
     .catch((err) => {
