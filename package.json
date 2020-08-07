@@ -1,16 +1,21 @@
 {
   "name": "kana-svg-data",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "JSON data for Japanese Kana characters",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": "https://github.com/hy2k/kana-svg-data.git",
   "author": "Yusuke Higuchi <hy2k@outlook.jp>",
   "license": "LGPL-3.0+",
-  "private": true,
   "scripts": {
-    "build": "ts-node ./src/index.ts",
+    "build": "rm -rf dist && ts-node ./src/index.ts",
     "format": "prettier --write \"**/*.{js,ts,md}\"",
-    "lint": "eslint --fix --ext .js,.ts ."
+    "lint": "eslint --fix --ext .js,.ts .",
+    "test": "jest",
+    "prepublish": "yarn lint && yarn test && yarn build && cp index.js dist"
   },
   "devDependencies": {
     "@types/jest": "^26.0.8",
