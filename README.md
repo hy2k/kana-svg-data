@@ -12,4 +12,4 @@ This repository's uses the svgsKana data from the [AnimeCJK](https://github.com/
 
 - GNU Lesser General Public License
 
-See, the animeCJK's [COPYING.txt](https://github.com/parsimonhi/animCJK/blob/master/licenses/COPYING.txt) for more information.
+For more information, please see the animeCJK's [COPYING.txt](https://github.com/parsimonhi/animCJK/blob/master/licenses/COPYING.txt) 
