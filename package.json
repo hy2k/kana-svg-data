@@ -1,6 +1,6 @@
 {
   "name": "kana-svg-data",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "JSON data for Japanese Kana characters",
   "main": "dist/index.js",
   "files": [
