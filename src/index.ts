@@ -1,44 +1,12 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { parse as parseSVG } from 'svgson'
+import { Categoty } from './constants'
 import { parseMedians } from './parse-medians'
-import { parseIdFromSVG } from './utils'
+import { isHiragana, isKatakana, parseIdFromSVG } from './utils'
 
 const inputDir = path.join(__dirname, '../vendor/animCJK/svgsKana')
 const distDir = path.join(__dirname, '../dist')
-
-type KanaCategoty = 'hiragana' | 'katakana'
-type KanaDictionary = {
-  [key in KanaCategoty]: string[]
-}
-
-// prettier-ignore
-const kanaDict: KanaDictionary = {
-  hiragana: [
-    'あ', 'い', 'う', 'え', 'お',
-    'か', 'き', 'く', 'け', 'こ',
-    'さ', 'し', 'す', 'せ', 'そ',
-    'た', 'ち', 'つ', 'て', 'と',
-    'な', 'に', 'ぬ', 'ね', 'の',
-    'は', 'ひ', 'ふ', 'へ', 'ほ',
-    'ま', 'み', 'む', 'め', 'も',
-    'や', 'ゆ', 'よ',
-    'ら', 'り', 'る', 'れ', 'ろ',
-    'わ', 'を', 'ん',
-  ],
-  katakana: [
-    'ア', 'イ', 'ウ', 'エ', 'オ',
-    'カ', 'キ', 'ク', 'ケ', 'コ',
-    'サ', 'シ', 'ス', 'セ', 'ソ',
-    'タ', 'チ', 'ツ', 'テ', 'ト',
-    'ナ', 'ニ', 'ヌ', 'ネ', 'ノ',
-    'ハ', 'ヒ', 'フ', 'ヘ', 'ホ',
-    'マ', 'ミ', 'ム', 'メ', 'モ',
-    'ヤ', 'ユ', 'ヨ',
-    'ラ', 'リ', 'ル', 'レ', 'ロ',
-    'ワ', 'ヲ', 'ン',
-  ],
-}
 
 function getCharCode(filename: string): number {
   return parseInt(path.basename(filename, '.svg'))
@@ -75,18 +43,17 @@ async function onFileContent(fileContent: string, filename: string) {
   }
 }
 
-function classifySVGFiles(dir: string, dict: KanaDictionary) {
-  const svgFiles = new Map<KanaCategoty, string[]>()
+function classifySVGFiles(dir: string) {
+  const svgFiles = new Map<string, string[]>()
   const allFilenames = fs.readdirSync(dir)
-
-  const caterories = Object.keys(dict) as KanaCategoty[]
-  caterories.forEach((category) => {
-    const filenames = allFilenames.filter((filename) => {
-      const charcode = getCharCode(filename)
-      return dict[category].includes(String.fromCharCode(charcode))
-    })
-    svgFiles.set(category, filenames)
-  })
+  svgFiles.set(
+    Categoty.hiragana,
+    allFilenames.filter((filename) => isHiragana(getCharCode(filename)))
+  )
+  svgFiles.set(
+    Categoty.katakana,
+    allFilenames.filter((filename) => isKatakana(getCharCode(filename)))
+  )
   return svgFiles
 }
 
@@ -94,7 +61,7 @@ if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir)
 }
 
-classifySVGFiles(inputDir, kanaDict).forEach((filelist, key) => {
+classifySVGFiles(inputDir).forEach((filelist, key) => {
   const outDir = path.join(distDir, key)
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir)
