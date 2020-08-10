@@ -8,7 +8,7 @@ describe('parse-medians', () => {
       [251, 308],
       [440, 306],
     ]
-    expect(parseMedians(testStr)).toEqual(expected)
+    expect(parseMedians(testStr)).toStrictEqual(expected)
   })
 
   it('parses space-separated median string such as カ', () => {
@@ -18,7 +18,7 @@ describe('parse-medians', () => {
       [528, 158],
       [489, 391],
     ]
-    expect(parseMedians(testStr)).toEqual(expected)
+    expect(parseMedians(testStr)).toStrictEqual(expected)
   })
 
   it('parses series of number separated by space such as の', () => {
@@ -28,6 +28,16 @@ describe('parse-medians', () => {
       [540, 439],
       [468, 605],
     ]
-    expect(parseMedians(testStr)).toEqual(expected)
+    expect(parseMedians(testStr)).toStrictEqual(expected)
+  })
+
+  it('parses mix of integers and floating point numbers such as お', () => {
+    const testStr = 'M 111.6,323.2 174,363.7 327,362.1'
+    const expected = [
+      [111.6, 323.2],
+      [174, 363.7],
+      [327, 362.1],
+    ]
+    expect(parseMedians(testStr)).toStrictEqual(expected)
   })
 })
