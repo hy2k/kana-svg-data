@@ -10,12 +10,12 @@ export function parseMedians(d: string): Median[] {
 
   while (found) {
     // X-coordinate
-    const numX = parseInt(medianStr)
+    const numX = parseFloat(medianStr)
     medianStr = medianStr.replace(numX.toString(), '')
     medianStr = trimLeftNonDigit(medianStr)
 
     // Y-coordinate
-    const numY = parseInt(medianStr)
+    const numY = parseFloat(medianStr)
     medianStr = medianStr.replace(numY.toString(), '')
     medianStr = trimLeftNonDigit(medianStr)
 
