@@ -1,22 +1,18 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { parse as parseSVG } from 'svgson'
-import { Categoty } from './constants'
+import { classify } from './classify'
 import { parseMedians } from './parse-medians'
-import { isHiragana, isKatakana, parseIdFromSVG } from './utils'
+import { parseCharCode, parseIdFromSVG } from './utils'
 
 const inputDir = path.join(__dirname, '../vendor/animCJK/svgsKana')
 const distDir = path.join(__dirname, '../dist')
-
-function getCharCode(filename: string): number {
-  return parseInt(path.basename(filename, '.svg'))
-}
 
 async function onFileContent(fileContent: string, filename: string) {
   const svgNode = await parseSVG(fileContent)
 
   // Remove the prefix `z` from id
-  const charCode = getCharCode(filename)
+  const charCode = parseCharCode(filename)
 
   const allSvgPaths = svgNode.children
     .filter((el) => el.name === 'path')
@@ -43,25 +39,11 @@ async function onFileContent(fileContent: string, filename: string) {
   }
 }
 
-function classifySVGFiles(dir: string) {
-  const svgFiles = new Map<string, string[]>()
-  const allFilenames = fs.readdirSync(dir)
-  svgFiles.set(
-    Categoty.hiragana,
-    allFilenames.filter((filename) => isHiragana(getCharCode(filename)))
-  )
-  svgFiles.set(
-    Categoty.katakana,
-    allFilenames.filter((filename) => isKatakana(getCharCode(filename)))
-  )
-  return svgFiles
-}
-
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir)
 }
 
-classifySVGFiles(inputDir).forEach((filelist, key) => {
+classify(fs.readdirSync(inputDir)).forEach((filelist, key) => {
   const outDir = path.join(distDir, key)
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir)

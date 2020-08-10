@@ -5,3 +5,4 @@ yarn.lock
 .eslintrc.js
 tsconfig.json
 dist/
+coverage/
